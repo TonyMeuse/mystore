@@ -991,6 +991,17 @@
             document.getElementById('useGradient').checked = siteInfo.useGradient;
             document.getElementById('siteInfoModal').style.display = 'block';
             document.body.classList.add('modal-open');
+            
+            // Auto-select text when fields are focused
+            setTimeout(() => {
+                const fields = ['editSiteTitle', 'editContactName', 'editContactPhone'];
+                fields.forEach(fieldId => {
+                    const field = document.getElementById(fieldId);
+                    field.addEventListener('focus', function() {
+                        this.select();
+                    });
+                });
+            }, 100);
         }
 
         // Close site info modal
@@ -1127,6 +1138,17 @@
             
             document.getElementById('itemModal').style.display = 'block';
             document.body.classList.add('modal-open');
+            
+            // Auto-select text when fields are focused
+            setTimeout(() => {
+                const fields = ['itemTitle', 'itemPrice', 'itemDescription', 'itemFullDescription'];
+                fields.forEach(fieldId => {
+                    const field = document.getElementById(fieldId);
+                    field.addEventListener('focus', function() {
+                        this.select();
+                    });
+                });
+            }, 100);
         }
 
         // Close item modal
