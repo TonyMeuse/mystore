@@ -1,0 +1,1463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Items for Sale</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: rgba(102, 126, 234, 0.2);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            transition: background 0.5s ease;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body.custom-bg {
+            background: var(--custom-bg-color);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+            position: relative;
+        }
+
+        .admin-link {
+            position: absolute;
+            top: 0;
+            right: 0;
+            color: #999;
+            text-decoration: none;
+            font-size: 0.9em;
+            padding: 5px 10px;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+
+        .admin-link:hover {
+            color: #667eea;
+            background: #f0f0f0;
+        }
+
+        h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .contact-info {
+            color: #666;
+            font-size: 1.1em;
+            margin-top: 10px;
+        }
+
+        .admin-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #e8f5e9;
+            border-radius: 10px;
+            border-left: 4px solid #28a745;
+        }
+
+        .admin-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .editable-header {
+            cursor: pointer;
+            transition: opacity 0.3s;
+        }
+
+        .admin-mode .editable-header:hover {
+            opacity: 0.7;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s;
+            font-weight: 600;
+            min-height: 44px; /* iOS touch target minimum */
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102,126,234,0.4);
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+            padding: 8px 16px;
+            font-size: 0.9em;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .items-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .item-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+            cursor: pointer;
+            border: 2px solid #f0f0f0;
+            position: relative;
+        }
+
+        .item-card.sold {
+            opacity: 0.8;
+        }
+
+        .item-content-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .item-main-info {
+            flex: 1;
+        }
+
+        .sold-badge {
+            background: #28a745;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1.1em;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .item-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            border-color: #667eea;
+        }
+
+        .item-card.sold:hover {
+            transform: translateY(-3px);
+        }
+
+        .item-image {
+            width: 100%;
+            height: 200px;
+            object-fit: contain;
+            background: #f0f0f0;
+        }
+
+        .item-details {
+            padding: 0;
+        }
+
+        .item-title {
+            font-size: 1.3em;
+            color: #333;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .item-price {
+            font-size: 1.5em;
+            color: #667eea;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .item-description {
+            color: #666;
+            line-height: 1.5;
+            margin-bottom: 15px;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .additional-photos-container {
+            margin-top: 20px;
+        }
+
+        .additional-photos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .additional-photo-wrapper {
+            position: relative;
+        }
+
+        .additional-photo {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 2px solid #e0e0e0;
+            transition: border-color 0.3s;
+        }
+
+        .additional-photo:hover {
+            border-color: #667eea;
+        }
+
+        .remove-photo-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            line-height: 1;
+            display: block;
+        }
+
+        .remove-photo-btn:hover {
+            background: #c82333;
+        }
+
+        .admin-mode .view-photos-gallery .remove-photo-btn {
+            display: block;
+        }
+
+        .view-photos-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .view-photos-gallery img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 2px solid #e0e0e0;
+            transition: all 0.3s;
+        }
+
+        .view-photos-gallery img:hover {
+            border-color: #667eea;
+            transform: scale(1.05);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+        }
+
+        body.modal-open {
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+        }
+
+        .modal-content {
+            background: white;
+            max-width: 800px;
+            margin: 50px auto;
+            border-radius: 15px;
+            padding: 40px;
+            position: relative;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            font-size: 2em;
+            cursor: pointer;
+            color: #999;
+            font-weight: 300;
+        }
+
+        .close-modal:hover {
+            color: #333;
+        }
+
+        .modal-image {
+            width: 100%;
+            max-height: 400px;
+            object-fit: contain;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            background: #f0f0f0;
+            cursor: pointer;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-group input[type="color"] {
+            height: 50px;
+            cursor: pointer;
+        }
+
+        .form-group input[type="tel"] {
+            font-size: 1.1em;
+        }
+
+        .color-preview {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .color-preview-box {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            border: 2px solid #e0e0e0;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            margin: 0;
+        }
+
+        @media (max-width: 768px) {
+            .checkbox-group input[type="checkbox"] {
+                width: 24px;
+                height: 24px;
+            }
+        }
+
+        .checkbox-group label {
+            margin: 0;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .login-form {
+            max-width: 400px;
+        }
+
+        .login-form .form-group input {
+            width: 100%;
+        }
+
+        .login-error {
+            color: #dc3545;
+            font-size: 0.9em;
+            margin-top: 10px;
+            margin-bottom: 10px;
+            display: none;
+        }
+
+        .login-error:not(:empty) {
+            display: block;
+        }
+
+        .image-preview {
+            width: 100%;
+            max-height: 200px;
+            object-fit: contain;
+            margin-top: 10px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .admin-mode-indicator {
+            color: #28a745;
+            font-weight: 600;
+        }
+
+        .no-items {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+            font-size: 1.2em;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                padding: 20px;
+                border-radius: 15px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .contact-info {
+                font-size: 0.95em;
+            }
+
+            .admin-link {
+                font-size: 0.85em;
+                padding: 4px 8px;
+            }
+
+            .items-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .admin-controls {
+                flex-direction: column;
+                gap: 15px;
+                padding: 15px;
+            }
+
+            .admin-buttons {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .admin-buttons button {
+                width: 100%;
+            }
+
+            .item-card {
+                margin: 0;
+            }
+
+            .item-content-wrapper {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .sold-badge {
+                align-self: flex-start;
+            }
+
+            .modal-content {
+                margin: 20px;
+                padding: 25px;
+                max-width: calc(100% - 40px);
+            }
+
+            .modal-image {
+                max-height: 250px;
+            }
+
+            .btn {
+                padding: 10px 20px;
+                font-size: 0.95em;
+            }
+
+            .form-group label {
+                font-size: 0.95em;
+            }
+
+            .form-group input,
+            .form-group textarea {
+                font-size: 16px; /* Prevents zoom on iOS */
+            }
+
+            .close-modal {
+                font-size: 1.5em;
+                top: 15px;
+                right: 20px;
+            }
+
+            .view-photos-gallery {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            }
+
+            .view-photos-gallery img {
+                height: 100px;
+            }
+
+            .additional-photos-grid {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            }
+
+            .additional-photo {
+                height: 100px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.5em;
+            }
+
+            .contact-info {
+                font-size: 0.85em;
+            }
+
+            .container {
+                padding: 15px;
+            }
+
+            .modal-content {
+                margin: 10px;
+                padding: 20px;
+                max-width: calc(100% - 20px);
+            }
+
+            .item-title {
+                font-size: 1.1em;
+            }
+
+            .item-price {
+                font-size: 1.3em;
+            }
+
+            .btn {
+                padding: 8px 16px;
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="#" class="admin-link" onclick="showLoginModal(); return false;">Admin</a>
+            <h1 id="siteTitle">Items for Sale</h1>
+            <div class="contact-info" id="contactInfo">
+                Contact: John Doe | 555-5555
+            </div>
+        </header>
+
+        <div class="admin-controls" id="adminControls" style="display: none;">
+            <div>
+                <span class="admin-mode-indicator">Admin Mode - Logged in</span>
+            </div>
+            <div class="admin-buttons">
+                <button class="btn btn-secondary" onclick="showSiteInfoModal()">Edit Site Info</button>
+                <button class="btn btn-secondary" onclick="showChangePasswordModal()">Change Password</button>
+                <button class="btn btn-primary" onclick="showAddItemModal()">Add New Item</button>
+                <button class="btn btn-secondary" onclick="logout()">Logout</button>
+            </div>
+        </div>
+
+        <div id="itemsGrid" class="items-grid"></div>
+    </div>
+
+    <!-- Admin Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeLoginModal()">&times;</span>
+            <h2>Admin Login</h2>
+            <form id="loginForm" class="login-form" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" required autocomplete="current-password">
+                </div>
+
+                <div class="login-error" id="loginError">Invalid password</div>
+
+                <button type="submit" class="btn btn-primary">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div id="changePasswordModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeChangePasswordModal()">&times;</span>
+            <h2>Change Password</h2>
+            <form id="changePasswordForm" class="login-form" onsubmit="handlePasswordChange(event)">
+                <div class="form-group">
+                    <label for="currentPassword">Current Password</label>
+                    <input type="password" id="currentPassword" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="newPassword">New Password</label>
+                    <input type="password" id="newPassword" required minlength="6">
+                    <small style="color: #666; font-size: 0.85em;">Minimum 6 characters</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm New Password</label>
+                    <input type="password" id="confirmPassword" required minlength="6">
+                </div>
+
+                <div class="login-error" id="passwordError"></div>
+
+                <button type="submit" class="btn btn-primary">Change Password</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Site Info Modal -->
+    <div id="siteInfoModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeSiteInfoModal()">&times;</span>
+            <h2>Edit Site Information</h2>
+            <form id="siteInfoForm" onsubmit="saveSiteInfo(event)">
+                <div class="form-group">
+                    <label for="editSiteTitle">Site Title</label>
+                    <input type="text" id="editSiteTitle" required>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editContactName">Contact Name</label>
+                        <input type="text" id="editContactName" placeholder="John Doe" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="editContactPhone">Phone Number</label>
+                        <input type="tel" id="editContactPhone" placeholder="555-555-5555" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="editBgColor">Background Color</label>
+                    <div class="color-preview">
+                        <input type="color" id="editBgColor" value="#667eea">
+                        <span style="color: #666;">Choose a solid color or keep the default gradient</span>
+                    </div>
+                </div>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" id="useGradient" checked>
+                    <label for="useGradient">Use default gradient background</label>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="margin-top: 20px;">Save Changes</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add/Edit Item Modal -->
+    <div id="itemModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeItemModal()">&times;</span>
+            <h2 id="modalTitle">Add New Item</h2>
+            <form id="itemForm" onsubmit="saveItem(event)">
+                <div class="form-group">
+                    <label for="itemTitle">Item Title *</label>
+                    <input type="text" id="itemTitle" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="itemPrice">Price *</label>
+                    <input type="text" id="itemPrice" placeholder="$0.00" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="itemDescription">Description *</label>
+                    <textarea id="itemDescription" required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="itemFullDescription">Full Description (Optional)</label>
+                    <textarea id="itemFullDescription" placeholder="Additional details shown when item is clicked"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="itemImage">Main Item Image</label>
+                    <input type="file" id="itemImage" accept="image/*" onchange="previewImage(event)">
+                    <img id="imagePreview" class="image-preview">
+                </div>
+
+                <div class="form-group">
+                    <label for="additionalImages">Additional Photos (up to 5 total)</label>
+                    <input type="file" id="additionalImages" accept="image/*" multiple onchange="previewAdditionalImages(event)">
+                    <small style="color: #666; font-size: 0.85em;">You can select multiple photos at once or add them one at a time. Click × to remove.</small>
+                    <div id="additionalPhotosPreview" class="additional-photos-grid"></div>
+                </div>
+
+                <input type="hidden" id="itemId">
+                <input type="hidden" id="itemImageData">
+                <input type="hidden" id="additionalImagesData">
+
+                <button type="submit" class="btn btn-primary" id="saveItemBtn">Save Item</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- View Item Details Modal -->
+    <div id="viewModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeViewModal()">&times;</span>
+            <img id="viewImage" class="modal-image">
+            <div id="viewAdditionalPhotos" class="view-photos-gallery"></div>
+            <h2 id="viewTitle"></h2>
+            <p class="item-price" id="viewPrice"></p>
+            <div id="viewSoldBadge" style="display: none; margin-bottom: 15px;">
+                <span style="background: #28a745; color: white; padding: 8px 20px; border-radius: 8px; font-weight: bold; display: inline-block;">SOLD</span>
+            </div>
+            <p id="viewDescription" style="color: #666; line-height: 1.6; margin-bottom: 20px;"></p>
+            <p id="viewFullDescription" style="color: #444; line-height: 1.6;"></p>
+            <div id="viewAdminControls" style="margin-top: 30px; display: none;">
+                <button class="btn btn-secondary" id="toggleSoldBtn" onclick="toggleSoldStatus()">Mark as Sold</button>
+                <button class="btn btn-danger" onclick="deleteCurrentItem()">Delete Item</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Image Lightbox Modal -->
+    <div id="lightboxModal" class="modal" style="background: rgba(0,0,0,0.9);" onclick="closeLightbox()">
+        <div style="position: relative; max-width: 90vw; max-height: 90vh; margin: 50px auto; display: flex; align-items: center; justify-content: center;">
+            <span class="close-modal" onclick="closeLightbox()" style="position: fixed; top: 20px; right: 30px; z-index: 1001; color: white; font-size: 3em;">&times;</span>
+            <img id="lightboxImage" style="max-width: 100%; max-height: 90vh; object-fit: contain; border-radius: 10px;" onclick="event.stopPropagation()">
+        </div>
+    </div>
+
+    <script>
+        let items = [];
+        let isAdminMode = false;
+        let currentViewingItemId = null;
+        let siteInfo = {
+            title: "Items for Sale",
+            contactName: "John Doe",
+            contactPhone: "555-5555",
+            bgColor: "#667eea",
+            useGradient: true
+        };
+        
+        // Admin credentials - stored in localStorage
+        let adminCredentials = {
+            password: "admin123"
+        };
+
+        // Load admin credentials from localStorage
+        function loadAdminCredentials() {
+            const saved = localStorage.getItem('adminCredentials');
+            if (saved) {
+                adminCredentials = JSON.parse(saved);
+            } else {
+                // Save default credentials if none exist
+                saveAdminCredentials();
+            }
+        }
+
+        // Save admin credentials to localStorage
+        function saveAdminCredentials() {
+            localStorage.setItem('adminCredentials', JSON.stringify(adminCredentials));
+        }
+
+        // Show change password modal
+        function showChangePasswordModal() {
+            document.getElementById('changePasswordForm').reset();
+            document.getElementById('passwordError').style.display = 'none';
+            document.getElementById('passwordError').textContent = '';
+            document.getElementById('changePasswordModal').style.display = 'block';
+            document.body.classList.add('modal-open');
+        }
+
+        // Close change password modal
+        function closeChangePasswordModal() {
+            document.getElementById('changePasswordModal').style.display = 'none';
+            document.body.classList.remove('modal-open');
+        }
+
+        // Handle password change
+        function handlePasswordChange(event) {
+            event.preventDefault();
+            
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const errorDiv = document.getElementById('passwordError');
+            
+            // Validate current password
+            if (currentPassword !== adminCredentials.password) {
+                errorDiv.textContent = 'Current password is incorrect';
+                errorDiv.style.display = 'block';
+                return;
+            }
+            
+            // Validate new passwords match
+            if (newPassword !== confirmPassword) {
+                errorDiv.textContent = 'New passwords do not match';
+                errorDiv.style.display = 'block';
+                return;
+            }
+            
+            // Validate password length
+            if (newPassword.length < 6) {
+                errorDiv.textContent = 'Password must be at least 6 characters';
+                errorDiv.style.display = 'block';
+                return;
+            }
+            
+            // Update password
+            adminCredentials.password = newPassword;
+            saveAdminCredentials();
+            
+            // Show success message and close modal
+            alert('Password changed successfully!');
+            closeChangePasswordModal();
+        }
+
+        // Format phone number as user types
+        function formatPhoneNumber(value) {
+            // Remove all non-numeric characters
+            const phoneNumber = value.replace(/\D/g, '');
+            const phoneNumberLength = phoneNumber.length;
+            
+            if (phoneNumberLength < 4) return phoneNumber;
+            if (phoneNumberLength < 7) {
+                return `${phoneNumber.slice(0, 3)}-${phoneNumber.slice(3)}`;
+            }
+            return `${phoneNumber.slice(0, 3)}-${phoneNumber.slice(3, 6)}-${phoneNumber.slice(6, 10)}`;
+        }
+
+        // Add phone number formatting listener
+        document.addEventListener('DOMContentLoaded', function() {
+            const phoneInput = document.getElementById('editContactPhone');
+            if (phoneInput) {
+                phoneInput.addEventListener('input', function(e) {
+                    const formatted = formatPhoneNumber(e.target.value);
+                    e.target.value = formatted;
+                });
+            }
+        });
+
+        // Format price to always show $X.XX format
+        function formatPrice(price) {
+            // Remove any existing $ signs and spaces
+            let numPrice = price.toString().replace(/[$\s,]/g, '');
+            
+            // Convert to number and format with 2 decimals
+            let num = parseFloat(numPrice);
+            if (isNaN(num)) {
+                return '$0.00';
+            }
+            
+            return '$' + num.toFixed(2);
+        }
+
+        // Load site info from localStorage
+        function loadSiteInfo() {
+            const saved = localStorage.getItem('siteInfo');
+            if (saved) {
+                siteInfo = JSON.parse(saved);
+            }
+            updateSiteDisplay();
+            applyBackgroundColor();
+        }
+
+        // Save site info to localStorage
+        function saveSiteInfoData() {
+            localStorage.setItem('siteInfo', JSON.stringify(siteInfo));
+        }
+
+        // Apply background color
+        function applyBackgroundColor() {
+            if (siteInfo.useGradient) {
+                document.body.classList.remove('custom-bg');
+                document.body.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+            } else {
+                document.body.classList.add('custom-bg');
+                document.body.style.setProperty('--custom-bg-color', siteInfo.bgColor);
+                document.body.style.background = siteInfo.bgColor;
+            }
+        }
+
+        // Update site display with current info
+        function updateSiteDisplay() {
+            document.getElementById('siteTitle').textContent = siteInfo.title;
+            
+            // Create clickable phone number
+            const contactDiv = document.getElementById('contactInfo');
+            contactDiv.innerHTML = `Contact: ${siteInfo.contactName} | <a href="tel:${siteInfo.contactPhone.replace(/\D/g, '')}" style="color: inherit; text-decoration: none; border-bottom: 1px dashed #999;">${siteInfo.contactPhone}</a>`;
+        }
+
+        // Show site info modal
+        function showSiteInfoModal() {
+            document.getElementById('editSiteTitle').value = siteInfo.title;
+            document.getElementById('editContactName').value = siteInfo.contactName;
+            document.getElementById('editContactPhone').value = siteInfo.contactPhone;
+            document.getElementById('editBgColor').value = siteInfo.bgColor;
+            document.getElementById('useGradient').checked = siteInfo.useGradient;
+            document.getElementById('siteInfoModal').style.display = 'block';
+            document.body.classList.add('modal-open');
+        }
+
+        // Close site info modal
+        function closeSiteInfoModal() {
+            document.getElementById('siteInfoModal').style.display = 'none';
+            document.body.classList.remove('modal-open');
+        }
+
+        // Save site info
+        function saveSiteInfo(event) {
+            event.preventDefault();
+            
+            siteInfo.title = document.getElementById('editSiteTitle').value;
+            siteInfo.contactName = document.getElementById('editContactName').value;
+            siteInfo.contactPhone = document.getElementById('editContactPhone').value;
+            siteInfo.bgColor = document.getElementById('editBgColor').value;
+            siteInfo.useGradient = document.getElementById('useGradient').checked;
+            
+            saveSiteInfoData();
+            updateSiteDisplay();
+            applyBackgroundColor();
+            closeSiteInfoModal();
+        }
+
+        // Load items from localStorage
+        function loadItems() {
+            const saved = localStorage.getItem('itemsForSale');
+            if (saved) {
+                items = JSON.parse(saved);
+                // Add backward compatibility for existing items
+                items = items.map(item => ({
+                    ...item,
+                    sold: item.sold !== undefined ? item.sold : false,
+                    additionalImages: item.additionalImages || []
+                }));
+            }
+            renderItems();
+        }
+
+        // Save items to localStorage
+        function saveItems() {
+            try {
+                localStorage.setItem('itemsForSale', JSON.stringify(items));
+            } catch (e) {
+                if (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
+                    alert('Storage limit reached! Try using smaller images or removing old items. Consider compressing images before uploading.');
+                    console.error('LocalStorage quota exceeded:', e);
+                } else {
+                    alert('Error saving items: ' + e.message);
+                    console.error('Error saving items:', e);
+                }
+            }
+        }
+
+        // Show login modal
+        function showLoginModal() {
+            document.getElementById('loginForm').reset();
+            document.getElementById('loginError').style.display = 'none';
+            document.getElementById('loginModal').style.display = 'block';
+            document.body.classList.add('modal-open');
+        }
+
+        // Close login modal
+        function closeLoginModal() {
+            document.getElementById('loginModal').style.display = 'none';
+            document.body.classList.remove('modal-open');
+        }
+
+        // Handle login
+        function handleLogin(event) {
+            event.preventDefault();
+            
+            const password = document.getElementById('password').value;
+            
+            if (password === adminCredentials.password) {
+                isAdminMode = true;
+                document.getElementById('adminControls').style.display = 'flex';
+                document.body.classList.add('admin-mode');
+                closeLoginModal();
+                renderItems();
+            } else {
+                document.getElementById('loginError').style.display = 'block';
+            }
+        }
+
+        // Logout
+        function logout() {
+            isAdminMode = false;
+            document.getElementById('adminControls').style.display = 'none';
+            document.body.classList.remove('admin-mode');
+            renderItems();
+        }
+
+        // Render items grid
+        function renderItems() {
+            const grid = document.getElementById('itemsGrid');
+            
+            if (items.length === 0) {
+                grid.innerHTML = '<div class="no-items">No items available yet. Check back soon!</div>';
+                return;
+            }
+
+            grid.innerHTML = items.map(item => `
+                <div class="item-card ${item.sold ? 'sold' : ''}" onclick="viewItem('${item.id}')">
+                    ${item.image ? `<img src="${item.image}" class="item-image" alt="${item.title}">` : '<div class="item-image"></div>'}
+                    <div class="item-content-wrapper">
+                        <div class="item-main-info">
+                            <div class="item-title">${item.title}</div>
+                            <div class="item-price">${formatPrice(item.price)}</div>
+                            <div class="item-description">${item.description}</div>
+                            ${isAdminMode ? `<button class="btn btn-danger" onclick="event.stopPropagation(); deleteItem('${item.id}')">Delete</button>` : ''}
+                        </div>
+                        ${item.sold ? '<div class="sold-badge">SOLD</div>' : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Show add item modal
+        function showAddItemModal() {
+            document.getElementById('modalTitle').textContent = 'Add New Item';
+            document.getElementById('itemForm').reset();
+            document.getElementById('itemId').value = '';
+            document.getElementById('itemImageData').value = '';
+            document.getElementById('additionalImagesData').value = '';
+            document.getElementById('imagePreview').style.display = 'none';
+            document.getElementById('additionalPhotosPreview').innerHTML = '';
+            currentAdditionalImages = [];
+            
+            // Reset save button
+            const saveBtn = document.getElementById('saveItemBtn');
+            saveBtn.disabled = false;
+            saveBtn.textContent = 'Save Item';
+            
+            document.getElementById('itemModal').style.display = 'block';
+            document.body.classList.add('modal-open');
+        }
+
+        // Close item modal
+        function closeItemModal() {
+            document.getElementById('itemModal').style.display = 'none';
+            document.getElementById('itemForm').reset();
+            document.getElementById('itemId').value = '';
+            document.getElementById('itemImageData').value = '';
+            document.getElementById('additionalImagesData').value = '';
+            document.getElementById('imagePreview').style.display = 'none';
+            document.getElementById('additionalPhotosPreview').innerHTML = '';
+            currentAdditionalImages = [];
+            
+            // Reset save button and flag
+            const saveBtn = document.getElementById('saveItemBtn');
+            saveBtn.disabled = false;
+            saveBtn.textContent = 'Save Item';
+            isSaving = false;
+            
+            document.body.classList.remove('modal-open');
+        }
+
+        // Compress image before storing
+        function compressImage(file, maxWidth = 1200, quality = 0.8) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+                        
+                        // Calculate new dimensions
+                        if (width > maxWidth) {
+                            height = (height * maxWidth) / width;
+                            width = maxWidth;
+                        }
+                        
+                        canvas.width = width;
+                        canvas.height = height;
+                        
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        
+                        // Convert to compressed base64
+                        resolve(canvas.toDataURL('image/jpeg', quality));
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // Preview image
+        function previewImage(event) {
+            const file = event.target.files[0];
+            if (file) {
+                compressImage(file).then(compressed => {
+                    const preview = document.getElementById('imagePreview');
+                    preview.src = compressed;
+                    preview.style.display = 'block';
+                    document.getElementById('itemImageData').value = compressed;
+                });
+            }
+        }
+
+        // Preview additional images
+        let currentAdditionalImages = [];
+        
+        function previewAdditionalImages(event) {
+            const files = event.target.files;
+            const previewContainer = document.getElementById('additionalPhotosPreview');
+            
+            if (!files || files.length === 0) return;
+            
+            // Check if adding these files would exceed the limit
+            if (currentAdditionalImages.length + files.length > 5) {
+                alert('You can only add up to 5 additional photos. Currently have ' + currentAdditionalImages.length + ' photos.');
+                event.target.value = ''; // Reset file input
+                return;
+            }
+            
+            Array.from(files).forEach((file) => {
+                compressImage(file).then(compressed => {
+                    currentAdditionalImages.push(compressed);
+                    
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'additional-photo-wrapper';
+                    wrapper.dataset.index = currentAdditionalImages.length - 1;
+                    
+                    const img = document.createElement('img');
+                    img.src = compressed;
+                    img.className = 'additional-photo';
+                    
+                    const removeBtn = document.createElement('button');
+                    removeBtn.className = 'remove-photo-btn';
+                    removeBtn.innerHTML = '×';
+                    removeBtn.type = 'button';
+                    removeBtn.onclick = function() {
+                        const idx = parseInt(wrapper.dataset.index);
+                        currentAdditionalImages.splice(idx, 1);
+                        updateAdditionalPhotosPreview();
+                    };
+                    
+                    wrapper.appendChild(img);
+                    wrapper.appendChild(removeBtn);
+                    previewContainer.appendChild(wrapper);
+                    
+                    // Store all additional images
+                    document.getElementById('additionalImagesData').value = JSON.stringify(currentAdditionalImages);
+                });
+            });
+            
+            // Reset file input so same file can be selected again if needed
+            event.target.value = '';
+        }
+        
+        function updateAdditionalPhotosPreview() {
+            const previewContainer = document.getElementById('additionalPhotosPreview');
+            previewContainer.innerHTML = '';
+            
+            currentAdditionalImages.forEach((imageData, index) => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'additional-photo-wrapper';
+                wrapper.dataset.index = index;
+                
+                const img = document.createElement('img');
+                img.src = imageData;
+                img.className = 'additional-photo';
+                
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'remove-photo-btn';
+                removeBtn.innerHTML = '×';
+                removeBtn.type = 'button';
+                removeBtn.onclick = function() {
+                    currentAdditionalImages.splice(index, 1);
+                    updateAdditionalPhotosPreview();
+                };
+                
+                wrapper.appendChild(img);
+                wrapper.appendChild(removeBtn);
+                previewContainer.appendChild(wrapper);
+            });
+            
+            document.getElementById('additionalImagesData').value = JSON.stringify(currentAdditionalImages);
+        }
+
+        // Save item
+        let isSaving = false;
+        function saveItem(event) {
+            event.preventDefault();
+            
+            // Prevent multiple submissions
+            if (isSaving) {
+                return;
+            }
+            isSaving = true;
+            
+            const saveBtn = document.getElementById('saveItemBtn');
+            saveBtn.disabled = true;
+            saveBtn.textContent = 'Saving...';
+            
+            try {
+                const id = document.getElementById('itemId').value || Date.now().toString();
+                const additionalImagesData = document.getElementById('additionalImagesData').value;
+                
+                const item = {
+                    id: id,
+                    title: document.getElementById('itemTitle').value,
+                    price: document.getElementById('itemPrice').value,
+                    description: document.getElementById('itemDescription').value,
+                    fullDescription: document.getElementById('itemFullDescription').value,
+                    image: document.getElementById('itemImageData').value,
+                    additionalImages: additionalImagesData ? JSON.parse(additionalImagesData) : [],
+                    sold: false // Default to not sold for new items
+                };
+
+                const existingIndex = items.findIndex(i => i.id === id);
+                if (existingIndex >= 0) {
+                    // Preserve sold status when editing
+                    item.sold = items[existingIndex].sold;
+                    items[existingIndex] = item;
+                } else {
+                    items.push(item);
+                }
+
+                saveItems();
+                renderItems();
+                closeItemModal();
+            } catch (error) {
+                console.error('Error saving item:', error);
+                alert('Error saving item: ' + error.message);
+            } finally {
+                isSaving = false;
+                saveBtn.disabled = false;
+                saveBtn.textContent = 'Save Item';
+            }
+        }
+
+        // Delete item
+        function deleteItem(id) {
+            if (confirm('Are you sure you want to delete this item?')) {
+                try {
+                    const originalLength = items.length;
+                    items = items.filter(item => item.id !== id);
+                    console.log('Deleted item:', id, 'Items before:', originalLength, 'Items after:', items.length);
+                    saveItems();
+                    renderItems();
+                } catch (error) {
+                    console.error('Error deleting item:', error);
+                    alert('Error deleting item: ' + error.message);
+                }
+            }
+        }
+
+        // View item details
+        function viewItem(id) {
+            const item = items.find(i => i.id === id);
+            if (!item) return;
+
+            currentViewingItemId = id;
+            const mainImage = document.getElementById('viewImage');
+            mainImage.src = item.image || '';
+            mainImage.style.display = item.image ? 'block' : 'none';
+            mainImage.style.cursor = item.image ? 'pointer' : 'default';
+            mainImage.onclick = item.image ? function() { openLightbox(item.image); } : null;
+            
+            // Display additional photos
+            const additionalPhotosContainer = document.getElementById('viewAdditionalPhotos');
+            if (item.additionalImages && item.additionalImages.length > 0) {
+                additionalPhotosContainer.innerHTML = item.additionalImages.map(img => 
+                    `<img src="${img}" alt="Additional photo" onclick="openLightbox('${img}')">`
+                ).join('');
+                additionalPhotosContainer.style.display = 'grid';
+            } else {
+                additionalPhotosContainer.style.display = 'none';
+            }
+            
+            document.getElementById('viewTitle').textContent = item.title;
+            document.getElementById('viewPrice').textContent = formatPrice(item.price);
+            document.getElementById('viewDescription').textContent = item.description;
+            
+            // Show sold badge if sold
+            const soldBadge = document.getElementById('viewSoldBadge');
+            soldBadge.style.display = item.sold ? 'block' : 'none';
+            
+            const fullDesc = document.getElementById('viewFullDescription');
+            if (item.fullDescription) {
+                fullDesc.textContent = item.fullDescription;
+                fullDesc.style.display = 'block';
+            } else {
+                fullDesc.style.display = 'none';
+            }
+
+            // Update toggle sold button text
+            const toggleBtn = document.getElementById('toggleSoldBtn');
+            if (toggleBtn) {
+                toggleBtn.textContent = item.sold ? 'Mark as Available' : 'Mark as Sold';
+            }
+
+            document.getElementById('viewAdminControls').style.display = isAdminMode ? 'block' : 'none';
+            document.getElementById('viewModal').style.display = 'block';
+            document.body.classList.add('modal-open');
+        }
+
+        // Open lightbox
+        function openLightbox(imageSrc) {
+            document.getElementById('lightboxImage').src = imageSrc;
+            document.getElementById('lightboxModal').style.display = 'block';
+            document.body.classList.add('modal-open');
+        }
+
+        // Close lightbox
+        function closeLightbox() {
+            document.getElementById('lightboxModal').style.display = 'none';
+            document.body.classList.remove('modal-open');
+        }
+
+        // Toggle sold status
+        function toggleSoldStatus() {
+            if (!currentViewingItemId) return;
+            
+            const itemIndex = items.findIndex(i => i.id === currentViewingItemId);
+            if (itemIndex >= 0) {
+                items[itemIndex].sold = !items[itemIndex].sold;
+                saveItems();
+                renderItems();
+                viewItem(currentViewingItemId); // Refresh the view
+            }
+        }
+
+        // Close view modal
+        function closeViewModal() {
+            document.getElementById('viewModal').style.display = 'none';
+            currentViewingItemId = null;
+            document.body.classList.remove('modal-open');
+        }
+
+        // Delete current viewing item
+        function deleteCurrentItem() {
+            if (currentViewingItemId && confirm('Are you sure you want to delete this item?')) {
+                items = items.filter(item => item.id !== currentViewingItemId);
+                saveItems();
+                renderItems();
+                closeViewModal();
+            }
+        }
+
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            if (event.target.className === 'modal') {
+                event.target.style.display = 'none';
+                document.body.classList.remove('modal-open');
+            }
+        }
+
+        // Close lightbox with escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                const lightbox = document.getElementById('lightboxModal');
+                if (lightbox && lightbox.style.display === 'block') {
+                    closeLightbox();
+                }
+            }
+        });
+
+        // Initialize
+        loadAdminCredentials();
+        loadSiteInfo();
+        loadItems();
+    </script>
+</body>
+</html>
